@@ -1,0 +1,17 @@
+{
+	"name": "ds_tbluserdataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sqlsourceconn",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "tbluser"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

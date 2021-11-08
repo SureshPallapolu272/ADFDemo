@@ -1,0 +1,49 @@
+{
+	"name": "Dataflowtransformations",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_sqltable2",
+						"type": "DatasetReference"
+					},
+					"name": "Countries"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sqltable1",
+						"type": "DatasetReference"
+					},
+					"name": "NewCountries"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_outputrows",
+						"type": "DatasetReference"
+					},
+					"name": "MatchingRows"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_outputrows",
+						"type": "DatasetReference"
+					},
+					"name": "NonMatchingRows"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Lookup"
+				},
+				{
+					"name": "ConditionalSplit1"
+				}
+			],
+			"script": "source(output(\n\t\tID as integer,\n\t\tName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> Countries\nsource(output(\n\t\tID as integer,\n\t\tName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> NewCountries\nCountries, NewCountries lookup(Countries@ID == NewCountries@ID,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup\nLookup split(isMatch(),\n\tdisjoint: false) ~> ConditionalSplit1@(MatchingRecords, NonMatchingRecords)\nConditionalSplit1@MatchingRecords sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['MatchingRows.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> MatchingRows\nConditionalSplit1@NonMatchingRecords sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['NonMatchingrecords.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> NonMatchingRows"
+		}
+	}
+}

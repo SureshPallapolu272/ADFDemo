@@ -1,0 +1,28 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_inputds",
+						"type": "DatasetReference"
+					},
+					"name": "sourcedataset"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_outputds",
+						"type": "DatasetReference"
+					},
+					"name": "sinkdataset"
+				}
+			],
+			"transformations": [],
+			"script": "source(output(\n\t\tCountry as string,\n\t\tYear as integer,\n\t\tProduct_Type as string,\n\t\tSales as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinferDriftedColumnTypes: true,\n\tignoreNoFilesFound: false) ~> sourcedataset\nsourcedataset sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['sales.csv'],\n\ttruncate: true,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tCountry,\n\t\tYear,\n\t\tProduct_Type,\n\t\tSales\n\t),\n\tpartitionBy('hash', 1)) ~> sinkdataset"
+		}
+	}
+}
